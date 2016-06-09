@@ -1,0 +1,271 @@
+
+<html>
+    <head>
+
+	<style>
+	   .tile{
+		width: 180px;
+		height: 160px;
+		text-align : center;
+		font-size :45pt;
+		font-weight :bold;
+		color:#265C00;
+		background-color: white; 
+                border: 3px solid #2E4600;
+	    }
+	</style>
+	
+	<style>
+	   .Myimage{
+    		left: 1000px;
+    		border: 3px solid #73AD21;
+    		top : =300px;
+	   }
+	</style>
+
+	<style>
+	   .backgrnd{
+		background: #A2C500;
+	        margin-left: -30px;
+                margin-top: 20px;
+		font-size: 40px;
+	        text-align : center;
+	    }
+	</style>
+
+	<style>
+	    .msgBox{
+		text-decoration:underline;
+                font-family: Verdana, Arial;
+		font-size: 26pt;
+		font-weight: bold;
+		width: 560px;
+		padding-left: 3px;
+		background-color: white;
+		text-align:center;
+		color: black;
+	     }
+	</style>
+
+	<script>
+		
+		function initGame(){
+			/*
+				The tic tac toe board can be represented by 3 * 3 matrix.
+				numRows and numCols can be changed to extend the game to any
+				square matrix. Allocate a 2-D matrix of numRows * numCols size
+				and initialize each cell with empty string.
+			*/
+			numRows = 3;
+			numCols = 3;
+			cellsUsed = 0;
+
+			/* Allocate 2-D matrix */
+			mat = new Array(numRows);
+			for (var i = 0; i < numRows; i++) {
+  				mat[i] = new Array(numCols);
+			}
+
+			/* initialize the matrix */
+			for (var i = 0; i < numRows; i++) {
+				for (var j = 0; j < numCols; j++) {
+					clearBox(i, j);
+					mat[i][j] = "";
+				}
+			}
+
+			/* First player who starts the game is represented by X and the
+			   subsequent moves are toggled between O and X. */
+			document.turn = "X";
+			document.winner = null;
+			DisplayMessage(document.turn +" gets to start");
+		}
+
+		function DisplayMessage(msg){
+			document.getElementById("message").innerText = msg;		
+		}
+
+		/*
+			PlayGame() is called when an user clicks a button on the webpage.
+			If the cell is clicked by the user was not clicked earlier, the 
+			information is maintained in the matrix. The number of cells count
+			is incremented.
+		*/
+		function playGame(tile, row, col){
+			if(document.winner != null){
+			    DisplayMessage(document.turn +" already won the game");
+			}else if(tile.innerText == ""){
+				/* The following line updates the cell with X or O when an user
+				   clicks a square on the table */
+			    tile.innerText = document.turn;
+				mat[row][col] = document.turn;
+				cellsUsed = cellsUsed + 1;
+				/* nextPlayer() checks for the result after reach move */
+			    nextPlayer(row, col);
+			}else{
+			    DisplayMessage("That tile is already used");
+			}		
+ 		}
+
+ 		function checkRows(player) {
+ 			var result = false;
+
+ 			/*
+ 				For each row, need to check whether all the cells in that row
+ 				are marked with the same player. If yes, return true.
+				If anyone of the columns in a row contains two players, then
+				skip that row and go to the next row.
+ 			*/
+ 			for (var i = 0; i < numRows; i++) {
+ 				result = true;
+ 				for (var j = 0; j < numCols; j++) {
+ 					if ((mat[i][j] != player)) {
+ 						result = false;
+ 						break;
+ 					}
+ 				}
+ 				/* We found a row in which all the cells were clicked by the single player, he won*/
+ 				if (result == true) {
+ 					return result;
+ 				}
+ 			}
+
+ 			return result;
+ 		}
+
+ 		function checkColumns(player)
+ 		{
+ 			var result = false;
+
+ 			/*
+ 				For each column, need to check whether all the cells in that column
+ 				are marked with the same player. If yes, return true.
+				If any one of the rows for that column contains cells clicked by different players, 
+				then skip that column and go to the next column.
+ 			*/
+ 			for (var j = 0; j < numCols; j++) {
+ 				result = true;
+ 				for (var i = 0; i < numRows; i++) {
+ 					if ((mat[i][j] != player)) {
+ 						result = false;
+ 						break;
+ 					}
+ 				}
+ 				/* Found the winner, all the cells in the column j are clicked by the same player */
+ 				if (result == true) {
+ 					return result;
+ 				}
+ 			}
+
+ 			return result;
+ 		}
+
+ 		function checkDiagonols(player) {
+ 			var result = true;
+
+ 			/*
+ 				Need to check 2 diagonals, the first diagonal
+ 				which is from left-top corner to right-bottom corner of the table. 
+ 				If all the cells in this diagonal are clicked by the player, then
+ 				announce that he is the winner. 
+ 			*/
+ 			for (var i = 0; i < numRows; i++) {
+ 				if ((mat[i][i] != player)) {
+ 					result = false;
+ 					break;
+ 				}
+ 			}
+ 			/* found the winner, return true and stop */
+ 			if (result == true) {
+ 				return result;
+ 			}
+
+ 			result = true;
+ 			/*
+ 				Check in the secondary diagonal, which is from the top-right corner to
+ 				bottom-left corner. If all he cells in this diagonal are clicked by the player,
+ 				then announce that he is the winner.
+ 			*/
+			for (var i = 0; i < numRows; i++) {
+ 				if ((mat[i][numCols-1-i] != player)) {
+ 					result = false;
+ 					break;
+ 				}
+ 			}
+ 			return result;
+ 		}
+
+ 		function checkWinMatrix(player) {	
+ 			var result = false;
+
+			/* check all the rows */
+			result = checkRows(player);
+			if (result == true) return result;
+ 			
+
+ 			/* check all the columns */
+ 			result = checkColumns(player)
+ 			if (result == true) return result;
+
+ 			/* check all the diagonals */
+ 			result = checkDiagonols(player);
+
+ 			return result;
+ 		}
+
+ 		function checkDrawMatrix() {
+ 			/* If all the cells in the table are clicked by the players and still
+ 			   if there is no winner, then the game is a Draw */
+ 			return (cellsUsed == numRows * numCols)
+ 		}
+
+		function nextPlayer(){
+			if(checkWinMatrix(document.turn)){
+				DisplayMessage("CONGRATULATIONS, PLAYER " + document.turn+" WINS");
+				document.winner = document.turn;
+			}else if (checkDrawMatrix()) {
+				DisplayMessage("It's a Draw");
+				document.winner = "Y";
+			}else{
+				if(document.turn == "X"){
+					document.turn = "O";
+					DisplayMessage("Player "+ document.turn +"'s turn");
+				}else{
+					document.turn = "X";
+					DisplayMessage("Player "+ document.turn +"'s turn");
+				}
+			}	
+		}
+
+		function clearBox(row, col){
+			document.getElementById("s-"+row+"-"+col).innerText = "";
+		}
+
+	</script>		
+    </head>
+
+    <body onLoad = initGame() bgcolor=white>
+	<h1 class = "backgrnd">TIC TAC TOE</H1> 
+	<div class = "msgBox" id = "message"> Messages will go here</div>
+		<table border = "1" align = right>
+			<tr>
+				<td id = "s-0-0" class = "tile" onclick = "playGame(this, 0, 0);"></td>
+				<td id = "s-0-1" class = "tile" onclick = "playGame(this, 0, 1);"></td>
+				<td id = "s-0-2" class = "tile" onclick = "playGame(this, 0, 2);"></td>
+			<tr>
+				<td id = "s-1-0" class = "tile" onclick = "playGame(this, 1, 0);"></td>
+				<td id = "s-1-1" class = "tile" onclick = "playGame(this, 1, 1);"></td>
+				<td id = "s-1-2" class = "tile" onclick = "playGame(this, 1, 2);"></td>
+			</tr>
+			<tr>
+				<td id = "s-2-0" class = "tile" onclick = "playGame(this, 2, 0);"></td>
+				<td id = "s-2-1" class = "tile" onclick = "playGame(this, 2, 1);"></td>
+				<td id = "s-2-2" class = "tile" onclick = "playGame(this, 2, 2);"></td>
+			</tr>
+
+		</table>
+		
+		<a href = "javascript:initGame();" class = "msgBox" > <div class = "msgBox">Restart the game</div> </a>
+     </body>
+</html>
+
